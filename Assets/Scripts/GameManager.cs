@@ -31,7 +31,21 @@ public class GameManager : MonoBehaviour
     {
         Application.targetFrameRate = 60;
 
-        NewGame();
+        // Si la escena se llama "1-2", "1-3", etc., empieza en ese nivel (sirve para probar)
+        string scene = SceneManager.GetActiveScene().name;
+        string[] parts = scene.Split('-');
+
+        if (parts.Length == 2 && int.TryParse(parts[0], out int w) && int.TryParse(parts[1], out int s))
+        {
+            lives = 3;
+            coins = 0;
+            world = w;
+            stage = s;
+        }
+        else
+        {
+            NewGame();
+        }
     }
 
     public void NewGame()
@@ -44,7 +58,7 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
-        // ← CAMBIO: ahora carga la escena de Game Over
+        // Carga la escena de Game Over
         SceneManager.LoadScene("GameOver");
     }
 
