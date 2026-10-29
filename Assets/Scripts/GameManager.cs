@@ -44,9 +44,8 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
-        // TODO: show game over screen
-
-        NewGame();
+        // ← CAMBIO: ahora carga la escena de Game Over
+        SceneManager.LoadScene("GameOver");
     }
 
     public void LoadLevel(int world, int stage)
