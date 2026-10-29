@@ -7,6 +7,12 @@ public class Player : MonoBehaviour
     public PlayerSpriteRenderer bigRenderer;
     private PlayerSpriteRenderer activeRenderer;
 
+    [Header("Sonidos")]
+    public AudioClip deathSound;
+    public AudioClip growSound;
+    public AudioClip shrinkSound;
+    public AudioClip starSound;
+
     public CapsuleCollider2D capsuleCollider { get; private set; }
     public DeathAnimation deathAnimation { get; private set; }
 
@@ -39,6 +45,9 @@ public class Player : MonoBehaviour
         bigRenderer.enabled = false;
         deathAnimation.enabled = true;
 
+        AudioManager.StopMusic();
+        AudioManager.Play(deathSound);
+
         GameManager.Instance.ResetLevel(3f);
     }
 
@@ -51,6 +60,7 @@ public class Player : MonoBehaviour
         capsuleCollider.size = new Vector2(1f, 2f);
         capsuleCollider.offset = new Vector2(0f, 0.5f);
 
+        AudioManager.Play(growSound);
         StartCoroutine(ScaleAnimation());
     }
 
@@ -63,6 +73,7 @@ public class Player : MonoBehaviour
         capsuleCollider.size = new Vector2(1f, 1f);
         capsuleCollider.offset = new Vector2(0f, 0f);
 
+        AudioManager.Play(shrinkSound);
         StartCoroutine(ScaleAnimation());
     }
 
@@ -91,6 +102,7 @@ public class Player : MonoBehaviour
 
     public void Starpower()
     {
+        AudioManager.Play(starSound);
         StartCoroutine(StarpowerAnimation());
     }
 

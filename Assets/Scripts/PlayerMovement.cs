@@ -16,6 +16,17 @@ public class PlayerMovement : MonoBehaviour
     public float jumpForce => (2f * maxJumpHeight) / (maxJumpTime / 2f);
     public float gravity => (-2f * maxJumpHeight) / Mathf.Pow(maxJumpTime / 2f, 2f);
 
+    [Header("Sonidos")]
+    public AudioClip jumpSound;
+    public AudioClip stompSound;
+    public AudioClip swimSound;
+
+    [Header("Nado (nivel acuatico)")]
+    public bool swimming = false;
+    public float swimImpulse = 6f;
+    public float swimGravityScale = 0.25f;
+    public float maxSinkSpeed = 3f;
+
     public bool grounded { get; private set; }
     public bool jumping { get; private set; }
     public bool running => Mathf.Abs(velocity.x) > 0.25f || Mathf.Abs(inputAxis) > 0.25f;
@@ -31,7 +42,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnEnable()
     {
-        rigidbody.isKinematic = false;
+        rigidbody.bodyType = RigidbodyType2D.Dynamic;
         collider.enabled = true;
         velocity = Vector2.zero;
         jumping = false;
@@ -39,7 +50,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnDisable()
     {
-        rigidbody.isKinematic = true;
+        rigidbody.bodyType = RigidbodyType2D.Kinematic;
         collider.enabled = false;
         velocity = Vector2.zero;
         jumping = false;
@@ -50,6 +61,11 @@ public class PlayerMovement : MonoBehaviour
         HorizontalMovement();
 
         grounded = rigidbody.Raycast(Vector2.down);
+
+        if (swimming) {
+            SwimMovement();
+            return;
+        }
 
         if (grounded) {
             GroundedMovement();
@@ -102,7 +118,27 @@ public class PlayerMovement : MonoBehaviour
         {
             velocity.y = jumpForce;
             jumping = true;
+            AudioManager.Play(jumpSound);
         }
+    }
+
+    private void SwimMovement()
+    {
+        if (grounded) {
+            velocity.y = Mathf.Max(velocity.y, 0f);
+        }
+
+        // cada vez que presionas saltar, Mario da una brazada hacia arriba
+        if (Input.GetButtonDown("Jump"))
+        {
+            velocity.y = swimImpulse;
+            AudioManager.Play(swimSound);
+        }
+
+        // se hunde lento
+        velocity.y += gravity * swimGravityScale * Time.deltaTime;
+        velocity.y = Mathf.Max(velocity.y, -maxSinkSpeed);
+        jumping = false;
     }
 
     private void ApplyGravity()
@@ -125,6 +161,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 velocity.y = jumpForce / 2f;
                 jumping = true;
+                AudioManager.Play(stompSound);
             }
         }
         else if (collision.gameObject.layer != LayerMask.NameToLayer("PowerUp"))
